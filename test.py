@@ -1,7 +1,5 @@
-import pyautogui
-import time
-
-
-while True:
-    print(pyautogui.position())
-    time.sleep(0.5)
+import winsound
+duration = 300  # milliseconds
+freq = 560  # Hz
+winsound.Beep(freq, duration)
+winsound.Beep(freq, duration)

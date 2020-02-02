@@ -4,18 +4,24 @@ import subprocess
 import time 
 import os, sys
 import pyautogui
+import winsound
+duration = 300  # milliseconds
+freq = 560  # Hz
+from pygame import mixer  # Load the popular external library
 
 # Import all commands used for Voice assistant
 from commands import *
-
 # Import webdriver for music, videos, etc.
 from webdriver import *
-
 from light_commands import *
 
 # Import YouTube functions
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "addons"))
 from youtubefunctions import *
+
+# Start PyGame sound player for TTS
+mixer.init()
+
 
 # Set up the Speech Recognition and Microphone
 recognizer = sr.Recognizer()
@@ -49,7 +55,11 @@ def new_wake_instance(new_instance, prev_instance):
         except:
             print("Timed out")
 
-    subprocess.Popen([NIRCMD_PATH, "setsysvolume", current_volume])
+    try:
+        subprocess.Popen([NIRCMD_PATH, "setsysvolume", current_volume])
+    except Exception as e:
+        print(e)
+        
     return new_instance
 
 
@@ -103,12 +113,18 @@ def format_detection(process_id):
     return detection_instance
 
 
-docker_image_id = "c7a8b75b121d"
-
 # Loop to keep checking whether or not wake word has been said
+docker_image_id = subprocess.check_output('docker container ls -a -q --filter=status=running'.split(), universal_newlines=True).rstrip()
 prev_instance = format_detection(docker_image_id)
 
+
 print("STARTING LOOP")
+
+
+mixer.music.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'phrases', 'setup-complete.mp3'))
+mixer.music.play()
+
+# PULSEAUDIO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pulseaudio', 'bin', 'pulseaudio.exe')
 
 while True:
     new_instance = format_detection(docker_image_id)
